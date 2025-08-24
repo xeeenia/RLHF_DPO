@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+*.pkl
+*.log
+*.tmp
+*.cache
+*.ipynb_checkpoints/
+
+# Jupyter Notebook checkpoint
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# MacOS / Windows
+.DS_Store
+Thumbs.db
+
+# Virtual env
+env/
+venv/
+.venv/
+
+# Output folders
+out_sft/
+out_rm/
+out_dpo/
+out/
+
+# Data
+data/
