@@ -16,8 +16,8 @@ ds = ds.map(to_text, remove_columns=ds.column_names)
 
 # 分词并构造标签
 def tokenize(batch):
-    out = tok(batch["text"], truncation=True, padding="max_length", max_length=MAX_LEN)
-    out["labels"] = out["input_ids"].copy()
+    out = tok(batch["text"], truncation=True, padding="max_length", max_length=MAX_LEN)  # 如果文本太长（超过 max_length），就截断
+    out["labels"] = out["input_ids"].copy()  # 将输入的 input_ids 拷贝一份作为标签 labels，用于语言模型的训练。
     return out
 ds = ds.map(tokenize, batched=True, remove_columns=["text"])
 
@@ -36,16 +36,16 @@ model.to("cuda" if torch.cuda.is_available() else "cpu") # 把模型移动到指
 
 # 训练配置
 args = TrainingArguments(
-    output_dir="out_sft",
-    per_device_train_batch_size=1,
-    gradient_accumulation_steps=8,
+    output_dir="out_sft",  # 指定训练过程中的输出目录
+    per_device_train_batch_size=1,  # 每个设备（GPU/CPU）的 batch size，设置为 1 → 一次只喂 1 个样本
+    gradient_accumulation_steps=8,  # 梯度累积的步数，累积 8 次 batch_size=1 的梯度，再做一次反向更新
     learning_rate=2e-5,
-    num_train_epochs=3,
-    fp16=torch.cuda.is_available(),
-    logging_steps=5,
-    save_strategy="epoch",
-    optim="adamw_torch",
-    gradient_checkpointing=True
+    num_train_epochs=3,  # 训练总轮数 = 3，一个 epoch = 数据集完整跑一遍
+    fp16=torch.cuda.is_available(),  # 是否启用半精度浮点
+    logging_steps=5,  # 每隔多少 step 打印一次日志（loss 等信息）
+    save_strategy="epoch",  # 模型保存策略，每个 epoch 结束时保存一次 checkpoint
+    optim="adamw_torch",  # 优化器选择，adamw_torch → PyTorch 原生的 AdamW（权重衰减版 Adam）
+    gradient_checkpointing=True  # 开启梯度检查点，在反向传播时，不保存所有中间激活值，而是需要时重新计算。减少显存消耗（可换显存换算力），缺点：训练速度会稍微变慢。
 )
 
 # 开训 + 保存
